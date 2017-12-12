@@ -69,6 +69,7 @@ function map_collision(
    end
   end
  end
+ return false
 end
 
 function check_object_collision(
@@ -192,7 +193,7 @@ function get_floor(player)
 end
 -->8
 function update_enemies()
-	if t%90==0 and t<3600 then
+	if t%90==0 and t<3600  then
 		spawn_enemy()
 	end
 	for enemy in all(enemies) do
@@ -315,34 +316,62 @@ function look_for_jump(
 		local x=(2*enemy.x
 			+enemy.width)/2+i*8
 		x=flr(x/8)*8+4
+		if map_collision(x,y,x,y,0)
+			==false
+		then
+			break
+		end
 		if map_collision(x,y,x,y,2)
  	then
  		local spot={x=x,y=y}
- 		count=count+1
+ 		count+=1
  		spots[count]=spot
  	end
- 	x=(2*enemy.x
+ end
+ for i=1,16 do
+ 	local x=(2*enemy.x
 			+enemy.width)/2-i*8
 		x=flr(x/8)*8+4
+		if map_collision(x,y,x,y,0)
+			==false
+		then
+			break
+		end
  	if	map_collision(x,y,x,y,2)
  	then
  		local spot={x=x,y=y}
- 		count=count+1
+ 		count+=1
  		spots[count]=spot
  	end
 	end
 	if count>0 then
-	local closest_distance=
-		get_distance(spots[1],player)
-	local index=1
-		for i=2,count do
- 		local distance=
- 			get_distance(spots[i],
- 			player)
- 		if distance<closest_distance
- 		then
- 			clostest_distance=distance
- 			index=i
+		local index=1
+		if player.floor-enemy.floor>1
+ 	then
+ 		local closest_distance=
+ 			get_distance(spots[1],enemy)
+ 		for i=2,count do
+  		local distance=
+  			get_distance(spots[i],
+  			enemy)
+  		if distance<closest_distance
+  		then
+  			clostest_distance=distance
+  			index=i
+  		end
+  	end
+  else
+  	local closest_distance=
+ 			get_distance(spots[1],player)
+ 		for i=2,count do
+  		local distance=
+  			get_distance(spots[i],
+  			player)
+  		if distance<closest_distance
+  		then
+  			clostest_distance=distance
+  			index=i	
+  		end
  		end
 		end 
 		if on_jump_box(
@@ -401,7 +430,7 @@ function look_for_drop(
 		if map_collision(x,y,x,y,1)
  	then
  		local spot={x=x,y=y}
- 		count=count+1
+ 		count+=1
  		spots[count]=spot
  	end
  	x=(2*enemy.x
@@ -410,7 +439,7 @@ function look_for_drop(
  	if	map_collision(x,y,x,y,1)
  	then
  		local spot={x=x,y=y}
- 		count=count+1
+ 		count+=1
  		spots[count]=spot
  	end
 	end
@@ -505,6 +534,7 @@ function shoot_gun(player)
 		 do		
 			add(bullets,shoot(player))
 		end
+     sfx(player.gun.sfx)
 		player.gun.ammo-=1
 		player.gun.shoot_time=0
 	end
@@ -575,6 +605,7 @@ function pistol(player)
 	gun.x=player.x
 	gun.y=player.y
 	gun.shoot_time=gun.rate
+   gun.sfx=2
 	return gun
 end
 
@@ -589,6 +620,7 @@ function shotgun(player)
 	gun.x=player.x
 	gun.y=player.y
 	gun.shoot_time=gun.rate
+   gun.sfx=1
 	return gun
 end
 
@@ -604,6 +636,7 @@ function rifle(player)
 	gun.x=player.x
 	gun.y=player.y
 	gun.shoot_time=gun.rate
+   gun.sfx=0
 	return gun
 end
 
@@ -1151,9 +1184,9 @@ __map__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __sfx__
-000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000400003f6703f670166701567001670016700f6000e6003760037600106000f6003760013000376001060037600376001060010600366003760011600116003760037600126001260036600366001260012600
+00010000000703f6703f67030670286702367024670206703f6703f6703f6703e6703d6703b6703a6703867036670366702f6702d67025670216701f6701e6701d6701d6701b6701c6701a6701a6701c67013670
+000700003f65017650000000161001600016100160001600016000160001600016000160001600016100000000000000000000018000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
